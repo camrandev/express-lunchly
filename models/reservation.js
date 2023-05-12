@@ -11,7 +11,8 @@ const { BadRequestError } = require("../expressError");
 
 class Reservation {
   constructor({ id, customerId, numGuests, startAt, notes }) {
-    console.log("startAt=", startAt)
+    this.count = [];
+    console.log("startAt=", startAt);
     this.id = id;
     this.customerId = customerId;
     this.numGuests = numGuests;
@@ -29,17 +30,17 @@ class Reservation {
 
   static async getReservationsForCustomer(customerId) {
     const results = await db.query(
-          `SELECT id,
+      `SELECT id,
                   customer_id AS "customerId",
                   num_guests AS "numGuests",
                   start_at AS "startAt",
                   notes AS "notes"
            FROM reservations
            WHERE customer_id = $1`,
-        [customerId],
+      [customerId]
     );
 
-    return results.rows.map(row => new Reservation(row));
+    return results.rows.map((row) => new Reservation(row));
   }
 
   /** save a reservation OR add new reservation if new */
@@ -47,31 +48,26 @@ class Reservation {
   async save() {
     if (this.id === undefined) {
       const result = await db.query(
-            `INSERT INTO reservations (customer_id, num_guests, start_at, notes)
+        `INSERT INTO reservations (customer_id, num_guests, start_at, notes)
              VALUES ($1, $2, $3, $4)
              RETURNING id`,
-          [this.customerId, this.numGuests, this.startAt, this.notes],
+        [this.customerId, this.numGuests, this.startAt, this.notes]
       );
       this.id = result.rows[0].id;
     } else {
       await db.query(
-            `UPDATE reservations
+        `UPDATE reservations
              SET customer_id=$1,
                 num_guests=$2,
                  start_at=$3,
                  notes=$4
-             WHERE id = $5`, [
-            this.customerId,
-            this.numGuests,
-            this.startAt,
-            this.notes,
-            this.id,
-          ],
+             WHERE id = $5`,
+        [this.customerId, this.numGuests, this.startAt, this.notes, this.id]
       );
     }
   }
 
-//////////////// GET / SET
+  //////////////// GET / SET
 
   /** get /set for notes */
 
@@ -92,7 +88,7 @@ class Reservation {
   }
   set numGuests(attendees) {
     if (attendees < 1) {
-      throw new BadRequestError("Must have at least 1 guest")
+      throw new BadRequestError("Must have at least 1 guest");
     }
     this._numGuests = attendees;
   }
@@ -103,13 +99,30 @@ class Reservation {
     return this._startAt;
   }
   set startAt(date) {
-    if (isNaN(new Date(date))) {
-      throw new BadRequestError("Invalid date")
+    const dateString = date;
+    const format = "YYYY-MM-DD hh:mm A";
+    if (!moment(dateString, format, true).isValid()) {
+      throw new BadRequestError("Invalid date");
     }
     this._startAt = new Date(date);
   }
 
-}
+  /** get / set for customerId */
 
+  get customerId() {
+    return this._customerId;
+  }
+
+  set customerId(id) {
+    if (this.count.length != 0) {
+      throw new BadRequestError("Cannot change customer id on reservation");
+    }
+    this.count.push(id);
+    this._customerId = id;
+  }
+
+
+  /**private methods */
+}
 
 module.exports = Reservation;
