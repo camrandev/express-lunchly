@@ -31,6 +31,25 @@ class Customer {
     return results.rows.map(c => new Customer(c));
   }
 
+  /** search for customers. */
+
+  static async search(searchKey) {
+    console.log('searchKey', searchKey);
+    const results = await db.query(
+          `SELECT id,
+                  first_name AS "firstName",
+                  last_name  AS "lastName",
+                  phone,
+                  notes
+           FROM customers
+           WHERE LOWER(first_name) LIKE $1
+                OR LOWER(last_name) LIKE $1
+           ORDER BY last_name, first_name`,
+           [`%${searchKey.toLowerCase()}%`]
+    );
+    return results.rows.map(c => new Customer(c));
+  }
+
   /** get a customer by ID. */
 
   static async get(id) {
@@ -90,6 +109,16 @@ class Customer {
       );
     }
   }
+
+  /** generate full name (firstName lastName) */
+
+  fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  }
+
 }
 
+
 module.exports = Customer;
+
+
