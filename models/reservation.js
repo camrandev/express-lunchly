@@ -103,11 +103,10 @@ class Reservation {
     return this._startAt;
   }
   set startAt(date) {
-    console.log("start set", date)
-    if (!this.getFormattedStartAt(date)) {
+    if (isNaN(new Date(date))) {
       throw new BadRequestError("Invalid date")
     }
-    this._startAt = date;
+    this._startAt = new Date(date);
   }
 
 }
