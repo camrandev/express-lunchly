@@ -124,10 +124,28 @@ class Customer {
     }
   }
 
+///////////// GET / SET
+
+
   /** generate full name (firstName lastName) */
 
-  fullName() {
+  get fullName() {
     return `${this.firstName} ${this.lastName}`;
+  }
+
+  /** get notes property */
+
+  get notes() {
+    return this._notes;
+  }
+
+  /** set notes property */
+
+  set notes(note) {
+    if (!note) {
+      note = "";
+    }
+    this._notes = note;
   }
 }
 

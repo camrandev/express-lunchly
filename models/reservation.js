@@ -5,11 +5,13 @@
 const moment = require("moment");
 
 const db = require("../db");
+const { BadRequestError } = require("../expressError");
 
 /** A reservation for a party */
 
 class Reservation {
   constructor({ id, customerId, numGuests, startAt, notes }) {
+    console.log("startAt=", startAt)
     this.id = id;
     this.customerId = customerId;
     this.numGuests = numGuests;
@@ -68,6 +70,46 @@ class Reservation {
       );
     }
   }
+
+//////////////// GET / SET
+
+  /** get /set for notes */
+
+  get notes() {
+    return this._notes;
+  }
+  set notes(note) {
+    if (!note) {
+      note = "";
+    }
+    this._notes = note;
+  }
+
+  /** get / set for numGuests */
+
+  get numGuests() {
+    return this._numGuests;
+  }
+  set numGuests(attendees) {
+    if (attendees < 1) {
+      throw new BadRequestError("Must have at least 1 guest")
+    }
+    this._numGuests = attendees;
+  }
+
+  /** get / set for startAt */
+
+  get startAt() {
+    return this._startAt;
+  }
+  set startAt(date) {
+    console.log("start set", date)
+    if (!this.getFormattedStartAt(date)) {
+      throw new BadRequestError("Invalid date")
+    }
+    this._startAt = date;
+  }
+
 }
 
 
