@@ -23,8 +23,8 @@ router.get("/", async function (req, res, next) {
   } else {
     customers = await Customer.search(req.query.search);
   }
-
-  return res.render("customer_list.html", { customers });
+  let test = "reservation should be here";
+  return res.render("customer_list.html", { customers, test });
 });
 
 /**Top-ten: show a list of the top ten customers */
