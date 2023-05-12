@@ -41,10 +41,9 @@ class Customer {
                   last_name  AS "lastName",
                   phone,
                   notes
-           FROM customers
-           WHERE LOWER(first_name) LIKE $1
-                OR LOWER(last_name) LIKE $1
-           ORDER BY last_name, first_name`,
+            FROM customers
+            WHERE (first_name || ' ' || last_name) ILIKE $1
+            ORDER BY last_name, first_name`,
       [`%${searchKey.toLowerCase()}%`]
     );
     return results.rows.map((c) => new Customer(c));
@@ -76,7 +75,7 @@ class Customer {
   }
 
   /** get a list of the 10 customers with the most reservations */
-  
+
   static async topTen() {
     const results = await db.query(
       `SELECT c.id,

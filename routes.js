@@ -17,14 +17,14 @@ const router = new express.Router();
 
 router.get("/", async function (req, res, next) {
   let customers;
+
   if (req.query.search === undefined) {
     customers = await Customer.all();
-    return res.render("customer_list.html", { customers });
   } else {
     customers = await Customer.search(req.query.search);
-    console.log("req=", req.query.search);
-    return res.render("customer_list.html", { customers });
   }
+
+  return res.render("customer_list.html", { customers });
 });
 
 /**Top-ten: show a list of the top ten customers */
